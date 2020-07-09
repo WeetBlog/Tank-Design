@@ -1,7 +1,9 @@
-import React, { Component } from 'react'
+import React, { Component} from 'react'
 import './home.css'
-import Menu  from 'antd/es/menu';
+import Menu from 'antd/es/menu';
 import { AppstoreOutlined, MailOutlined, SettingOutlined } from '@ant-design/icons';
+import logo from '../../assets/images/logo.png'
+
 
 const { SubMenu } = Menu;
 export default class home extends Component {
@@ -21,44 +23,47 @@ export default class home extends Component {
         }
     };
 
+    
+
     render() {
         return (
-            <Menu
-                className="home"
-                mode="inline"
-                openKeys={this.state.openKeys}
-                onOpenChange={this.onOpenChange}
-                style={{ width: 256 }}
-            >
-                <SubMenu
-                    key="sub1"
-                    title={
-                        <span>
-                            <MailOutlined />
-                            <span>Navigation One</span>
-                        </span>
-                    }
+            <>
+                <Menu
+                    className="home"
+                    mode="inline"
+                    openKeys={this.state.openKeys}
+                    onOpenChange={this.onOpenChange}
+                    style={{ width: 256 }}
                 >
-                    <Menu.Item key="1">Option 1</Menu.Item>
-                    <Menu.Item key="2">Option 2</Menu.Item>
-                    <Menu.Item key="3">Option 3</Menu.Item>
-                    <Menu.Item key="4">Option 4</Menu.Item>
-                </SubMenu>
-                <SubMenu key="sub2" icon={<AppstoreOutlined />} title="Navigation Two">
-                    <Menu.Item key="5">Option 5</Menu.Item>
-                    <Menu.Item key="6">Option 6</Menu.Item>
-                    <SubMenu key="sub3" title="Submenu">
-                        <Menu.Item key="7">Option 7</Menu.Item>
-                        <Menu.Item key="8">Option 8</Menu.Item>
+                    <div>
+                        <img src={logo} style={{ width: 256 }} alt="" />
+                    </div>
+                    <SubMenu className="mailTitle"
+                        key="sub1"
+                        title={
+                            <span>
+                                <MailOutlined/>
+                                <span>权限管理</span>
+                            </span>
+                        }
+                    >
+                        <Menu.Item key="1">用户管理</Menu.Item>
+                        <Menu.Item key="2">添加角色</Menu.Item>
+                        <Menu.Item key="3">用户动态</Menu.Item>
                     </SubMenu>
-                </SubMenu>
-                <SubMenu key="sub4" icon={<SettingOutlined />} title="Navigation Three">
-                    <Menu.Item key="9">Option 9</Menu.Item>
-                    <Menu.Item key="10">Option 10</Menu.Item>
-                    <Menu.Item key="11">Option 11</Menu.Item>
-                    <Menu.Item key="12">Option 12</Menu.Item>
-                </SubMenu>
-            </Menu>
+                    <SubMenu className="mailTitle" key="sub2" icon={<AppstoreOutlined />} title="博客管理">
+                        <Menu.Item key="5">所有博客</Menu.Item>
+                        <Menu.Item key="6">分类管理</Menu.Item>
+                        <Menu.Item key="4">新增博客</Menu.Item>
+                    </SubMenu>
+                    <SubMenu className="mailTitle" key="sub4" icon={<SettingOutlined />} title="记录管理">
+                        <Menu.Item key="9">评论管理</Menu.Item>
+                        <Menu.Item key="7">新增记录</Menu.Item>
+                        <Menu.Item key="8">记录管理</Menu.Item>
+                    </SubMenu>
+                </Menu>
+                
+            </>
         );
     }
 }

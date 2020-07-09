@@ -1,7 +1,10 @@
-body,html{
+.home{
+    position: fixed;
+    z-index: 1;
     height: 100%;
 }
-.home{
-    height: 100%;
-    background-color: #bfa;
+.mailTitle{
+    font-weight: blod;
+    font-size: 15px;
+    color: rgb(155, 108, 20);
 }

@@ -1,0 +1,17 @@
+.main{
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding-left: 256px;
+}
+.title{
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 0;
+}
+.main-content{
+    box-sizing: border-box;
+    padding: 15px;
+}
