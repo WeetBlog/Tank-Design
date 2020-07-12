@@ -2,20 +2,19 @@ import React, { Component } from 'react'
 import Form from 'antd/es/form';
 import Input from 'antd/es/input';
 import Button from 'antd/es/button';
-import PropTypes from 'prop-types'
-import {getUser} from '../../redux/actions'
+import {getLoginUser} from '../../redux/actions/login'
+import {connect} from "react-redux"
 import './index.css'
-import Password from 'antd/es/input/Password';
 
-export default class Ligon extends Component {
-    static propTypes = {
-		store : PropTypes.object.isRequired
-	}
-    onFinish = values => {
-        console.log('Success:', values);
-        console.log(this.props.store);
-        
-        this.props.store.dispatch(getUser(values.account,values.password))
+
+@connect(
+    ()=>({}),
+    {getLoginUser}
+)
+class Login extends Component {
+
+    onFinish = values => {   
+        this.props.getLoginUser(values.account,values.password)
     }
     onFinishFailed = errorInfo => {
         console.log('Failed:', errorInfo);
@@ -60,3 +59,4 @@ export default class Ligon extends Component {
         )
     }
 }
+export default Login

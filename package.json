@@ -9,6 +9,7 @@
     "antd": "^4.4.0",
     "axios": "^0.19.2",
     "nprogress": "^0.2.0",
+    "pubsub-js": "^1.8.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-redux": "^7.2.0",
@@ -39,10 +40,12 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-decorators": "^7.10.4",
     "babel-plugin-import": "^1.13.0",
     "customize-cra": "^1.0.0",
     "less": "^3.11.3",
     "less-loader": "^6.2.0",
-    "react-app-rewired": "^2.1.6"
+    "react-app-rewired": "^2.1.6",
+    "redux-devtools-extension": "^2.13.8"
   }
 }

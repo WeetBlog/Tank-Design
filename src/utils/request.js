@@ -4,7 +4,7 @@
 import axios from "axios";
 import { notification } from "antd";
 import history from "./history";
-import store from "../redux/store";
+// import store from "../redux/store";
 // import { removeToken } from "@/redux/actions/login";
 // 进度条
 import NProgress from "nprogress";
@@ -85,7 +85,6 @@ axiosInstance.interceptors.response.use(
   // 响应成功之后，用户设置回调函数之前触发
   (res) => {
     NProgress.done();
-    console.log(res);
     const data = res.data;
     // 统一处理：功能成功/失败
     if (data.code === "200") {

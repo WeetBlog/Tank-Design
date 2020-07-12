@@ -1,0 +1,1 @@
+export const GET_COMPONENT_NAME = "GET_COMPONENT_NAME"
