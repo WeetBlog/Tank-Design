@@ -91,10 +91,31 @@ class home extends Component {
                             }
                         })}>发布公告</Menu.Item>
                     </SubMenu>
-                    <SubMenu className="mailTitle" key="sub2" icon={<CoffeeOutlined />} title="博客管理">
-                        <Menu.Item key="5">所有博客</Menu.Item>
-                        <Menu.Item key="6">分类管理</Menu.Item>
-                        <Menu.Item key="4">新增博客</Menu.Item>
+                    <SubMenu className="mailTitle" key="sub2" icon={<CoffeeOutlined />} title="我的博客">
+                        <Menu.Item key="5" onClick={() => this.toRouter({
+                            address: "/blog/allblog",
+                            componentName: {
+                                firstName: "我的博客",
+                                secondName: "所有博客",
+                                lastName: "",
+                            }
+                        })}>所有博客</Menu.Item>
+                        <Menu.Item key="6" onClick={() => this.toRouter({
+                            address: "/blog/updateblog",
+                            componentName: {
+                                firstName: "我的博客",
+                                secondName: "管理博客",
+                                lastName: "",
+                            }
+                        })}>管理博客</Menu.Item>
+                        <Menu.Item key="4" onClick={() => this.toRouter({
+                            address: "/blog/addblog",
+                            componentName: {
+                                firstName: "我的博客",
+                                secondName: "编写博客",
+                                lastName: "",
+                            }
+                        })}>编写博客</Menu.Item>
                     </SubMenu>
                     <SubMenu className="mailTitle" key="sub4" icon={<CommentOutlined />} title="记录管理">
                         <Menu.Item key="9">评论管理</Menu.Item>

@@ -26,7 +26,9 @@ module.exports = override(
   addLessLoader({
     lessOptions: {
       javascriptEnabled: true,
-      modifyVars: { '@primary-color': '#bfa' },
+      modifyVars: {
+        "@primary-color": "#1DA57A",
+      },
     },
   }),
   //用于支持装饰器语法

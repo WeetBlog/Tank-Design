@@ -1,0 +1,41 @@
+.blog-button {
+    margin-right: 10px;
+}
+
+.site-tag-plus {
+    background: #fff;
+    border-style: dashed;
+}
+
+.edit-tag {
+    user-select: none;
+}
+
+.tag-input {
+    width: 78px;
+    margin-right: 8px;
+    vertical-align: top;
+}
+
+.blogMessage {
+    margin-top: 10px;
+    font-family: "楷体";
+}
+
+.blogContent {
+    margin-top: 20px;
+    line-height: 150%;
+}
+
+.ant-upload-select-picture-card i {
+    color: #999;
+    font-size: 32px;
+}
+
+.ant-upload-select-picture-card .ant-upload-text {
+    margin-top: 8px;
+    color: #666;
+}
+.site-page-header {
+    border: 1px solid rgb(235, 237, 240);
+  }
