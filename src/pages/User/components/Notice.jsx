@@ -7,58 +7,88 @@ import Button from 'antd/es/button'
 import Alert from 'antd/es/alert'
 import Space from 'antd/es/space'
 import Transfer from 'antd/es/transfer';
+import message from 'antd/es/message';
 import { SoundOutlined } from '@ant-design/icons';
 import Switch from 'antd/es/switch'
 import './index.css'
-export default class Notice extends Component {
+import {reqAddMessageManyPeople} from '../../../api/user'
+import {connect} from 'react-redux'
+import {getAllUser} from '../redux/actions' 
+@connect(
+    (state)=>({
+        users:state.user
+    }),
+    {getAllUser}
+)
+class Notice extends Component {
     state = {
-        mockData: [
-            {
-                key: "1",
-                title: "aa"
-            },
-            {
-                key: "2",
-                title: "bb"
-            },
-            {
-                key: "3",
-                title: "cc"
-            },
-            {
-                key: "4",
-                title: "aa"
-            },
-            {
-                key: "5",
-                title: "bb"
-            },
-            {
-                key: "6",
-                title: "cc"
-            }
-        ],
         targetKeys: [],
-        custom : true 
+        custom : true ,
+        people :[]
     }
+    // 获取actions所有用户信息
+    getAllUserInfo = async () => {
+        let result = await this.props.getAllUser()
+        result = result.map(item=>{
+            item.key = item.uid
+            return item
+        })
+        let ids = result.map(item=>{
+            item.key = item.uid
+            return item.uid
+        })
+        this.setState({
+            people: result,
+            targetKeys : ids
+        })
+    }
+
+    componentDidMount() {
+        this.getAllUserInfo()
+    }
+
     onFinish = values => {
         console.log('Success:', values);
+        if(this.state.targetKeys.length===0){
+            message.error("抱歉，您未选择用户")
+        }else{
+            reqAddMessageManyPeople(this.state.targetKeys,values.value).then(res=>{
+                if(res === 1){
+                    message.success("发布成功")
+                }else{
+                    message.error("未能发布成功，请稍后再试")
+                }
+            }).catch(err=>{
+                message.error(err)
+            })
+        }
     }
 
     checkCustom = (checked,event) =>{
+        
+        if(!checked){
+            this.setState({
+                targetKeys: []
+            })
+        }else{
+            let ids = this.state.people.map(item=>{
+                item.key = item.uid
+                return item.uid
+            })
+            this.setState({
+                targetKeys : ids
+            })
+        }
         this.setState({
             custom : checked
         })
     }
 
-    filterOption = (inputValue, option) => option.title.indexOf(inputValue) > -1;
+    filterOption = (inputValue, option) => option.uname.indexOf(inputValue) > -1;
 
     handleChange = targetKeys => {
+        message.info(`已选择 ${targetKeys.length} 位用户`)
         this.setState({ targetKeys });
-    };
-
-    handleSearch = (dir, value) => {
-        console.log('search:', dir, value);
     };
     render() {
         let {custom} = this.state
@@ -81,7 +111,7 @@ export default class Notice extends Component {
                                 onFinish={this.onFinish}
                             >
                                 <Form.Item
-                                    name="username"
+                                    name="value"
                                     rules={[{ required: true, message: '不能发布空的信息' }]}
                                 >
                                     <Input prefix={<SoundOutlined className="site-form-item-icon" />} placeholder="write here ......" />
@@ -99,17 +129,16 @@ export default class Notice extends Component {
                         </Col>
                         <Col className="gutter-row" span={16}>
                             <Transfer
-                                dataSource={this.state.mockData}
+                                dataSource={this.state.people}
                                 showSearch
                                 disabled={custom}
                                 listStyle={{width:"100%",minHeight:450}}
                                 filterOption={this.filterOption}
                                 targetKeys={this.state.targetKeys}
                                 onChange={this.handleChange}
-                                onSearch={this.handleSearch}
                                 titles={["未选择用户","已选用户"]}
                                 operations={["添加","退回"]}
-                                render={item => item.title}
+                                render={item => item.uname}
                             /></Col>
                     </Row>
                 </Space>
@@ -117,3 +146,5 @@ export default class Notice extends Component {
         )
     }
 }
+
+export default  Notice

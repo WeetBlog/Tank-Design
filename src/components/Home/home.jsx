@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import './home.css'
 import Menu from 'antd/es/menu';
-import { CoffeeOutlined, UserSwitchOutlined, CommentOutlined } from '@ant-design/icons';
+import { CoffeeOutlined, UserSwitchOutlined, CommentOutlined,NodeIndexOutlined } from '@ant-design/icons';
 import logo from '../../assets/images/logo.png'
 import { connect } from "react-redux"
 import { getUserInfo } from '../../redux/actions/user'
@@ -20,7 +20,7 @@ class home extends Component {
         this.props.getUserInfo(sessionStorage.getItem("token"))
     }
 
-    rootSubmenuKeys = ['sub1', 'sub2', 'sub4'];
+    rootSubmenuKeys = ['sub1', 'sub2','sub3', 'sub4'];
 
     state = {
         // openKeys: ['sub1'],
@@ -116,6 +116,10 @@ class home extends Component {
                                 lastName: "",
                             }
                         })}>编写博客</Menu.Item>
+                    </SubMenu>
+                    <SubMenu className="mailTitle" key="sub3" icon={<NodeIndexOutlined />} title="分类管理">
+                        <Menu.Item key="9">添加分类</Menu.Item>
+                        <Menu.Item key="7">编辑分类</Menu.Item>
                     </SubMenu>
                     <SubMenu className="mailTitle" key="sub4" icon={<CommentOutlined />} title="记录管理">
                         <Menu.Item key="9">评论管理</Menu.Item>

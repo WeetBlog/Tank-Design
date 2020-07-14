@@ -9,13 +9,24 @@ import Card from 'antd/es/card'
 import Tooltip from 'antd/es/tooltip'
 import Modal from 'antd/es/modal'
 import Divider from 'antd/es/divider'
-
+import Select from 'antd/es/select'
+import message from 'antd/es/message'
+import { reqAddBlog } from '../../../api/blog'
 import { MinusCircleOutlined, PlusOutlined, EditFilled, ExclamationCircleOutlined } from '@ant-design/icons';
 import notification from 'antd/es/notification'
 import PubSub from 'pubsub-js'
-
+import { connect } from 'react-redux'
 import './index.css'
-export default class addBlog extends Component {
+const { Option } = Select;
+
+
+
+@connect(
+    (state) => ({
+        user: state.user
+    })
+)
+class addBlog extends Component {
     state = {
         tags: ['个人博客'],
         inputVisible: false,
@@ -24,7 +35,8 @@ export default class addBlog extends Component {
         editInputValue: '',
         blogTitle: "",
         blogMessage: "",
-        blogContent: ""
+        blogContent: "",
+        blogType: 1
     };
     handleClose = removedTag => {
         const tags = this.state.tags.filter(tag => tag !== removedTag);
@@ -77,7 +89,12 @@ export default class addBlog extends Component {
         this.editInput = input;
     };
 
-
+    // 博客类型
+    handleChange = (value) => {
+        this.setState({
+            blogType: value
+        })
+    }
 
     // 表单
     onFinish = values => {
@@ -89,35 +106,61 @@ export default class addBlog extends Component {
                     '检测发现您没有添加任何段落，请至少添加一段段落内容才可发布博客',
             })
         } else {
-
-            // 是否添加图片
-            if (true) {
-                confirm({
-                    title: '是否要为博客添加图片?',
-                    icon: <ExclamationCircleOutlined />,
-                    content: '添加图片可以让博客看上去整体更加美观',
-                    onOk() {
-                        PubSub.publish('changeComponent', {
-                            address: `/blog/addblog/image/123`,
-                            componentName: {
-                                firstName: "我的博客",
-                                secondName: "编写博客",
-                                lastName: "添加博客图片",
-                            }
-                        })
-                    },
-                    onCancel() {
-                        PubSub.publish('changeComponent', {
-                            address: `/blog/allblog`,
-                            componentName: {
-                                firstName: "我的博客",
-                                secondName: "所有博客",
-                                lastName: "",
-                            }
-                        })
-                    },
-                })
+            let { blogTitle, blogMessage, blogContent, blogType, tags } = this.state
+            blogContent = blogContent.map(item => {
+                let obj = {
+                    content: item,
+                    img: []
+                }
+                return obj
+            })
+            let { uid, uname, uimg, udescription } = this.props.user
+            let blog = {
+                blogtype: blogType,
+                blogtitle: blogTitle,
+                blogmessage: blogMessage,
+                blogtags: tags,
+                blogcontent: blogContent
             }
+            let user = {
+                uid, uname, uimg, udescription
+            }
+            reqAddBlog(blog, user).then(res => {
+                if (res) {
+                    message.success("博客发布成功")
+                    console.log(res);
+                    confirm({
+                        title: '是否要为博客添加图片?',
+                        icon: <ExclamationCircleOutlined />,
+                        content: '添加图片可以让博客看上去整体更加美观',
+                        onOk() {
+                            PubSub.publish('changeComponent', {
+                                address: `/blog/addblog/image/${res._id}`,
+                                componentName: {
+                                    firstName: "我的博客",
+                                    secondName: "编写博客",
+                                    lastName: "添加博客图片",
+                                }
+                            })
+                        },
+                        onCancel() {
+                            PubSub.publish('changeComponent', {
+                                address: `/blog/allblog`,
+                                componentName: {
+                                    firstName: "我的博客",
+                                    secondName: "所有博客",
+                                    lastName: "",
+                                }
+                            })
+                        },
+                    })
+                } else {
+                    message.error("博客未年发布成功，请稍后再试")
+                }
+            }).catch(err => {
+                message.error(err)
+            })
+
         }
     };
 
@@ -246,6 +289,17 @@ export default class addBlog extends Component {
                                 )}
                             </Form.Item>
 
+                            {/* 博客类型   1学习技巧，2，精选摘要，3，生活记录，4，其他*/}
+                            <Form.Item>
+                                <Select defaultValue={1} onChange={this.handleChange}>
+                                    <Option value="" disabled>博客类型选择</Option>
+                                    <Option value={1}>学习技巧</Option>
+                                    <Option value={2}>精选摘要</Option>
+                                    <Option value={3}>生活记录</Option>
+                                    <Option value={4}>其他</Option>
+                                </Select>
+                            </Form.Item>
+
 
                             {/* 段落 */}
                             <Form.List name="blogContent">
@@ -340,3 +394,5 @@ export default class addBlog extends Component {
         )
     }
 }
+
+export default addBlog

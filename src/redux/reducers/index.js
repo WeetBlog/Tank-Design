@@ -4,10 +4,14 @@ import login from './login'
 import user from './user'
 
 import {componentName} from '../../components/Main/redux'
+import {users} from '../../pages/User/redux'
+import {blogs} from '../../pages/Blog/redux'
 
 
 export default combineReducers({
     login,
     user,
+    users,
+    blogs,
     componentName
 })

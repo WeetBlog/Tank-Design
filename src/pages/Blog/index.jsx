@@ -14,7 +14,7 @@ export default class Blog extends Component {
                 <Suspense fallback={<div>Loading...</div>}>
                     <Switch>
                         <Route path="/blog/addblog" component={AddBlog} exact/>
-                        <Route path="/blog/addblog/image" component={AddBlogIamge} />
+                        <Route path="/blog/addblog/image/:id" component={AddBlogIamge} />
                         <Route path="/blog/updateblog" component={UpdateBlog} exact/>
                         <Route path="/blog/updateblog/info" component={UpdateBlogInfo} />
                         <Route path="/blog/allblog" component={AllBlog} />

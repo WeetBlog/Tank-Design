@@ -12,7 +12,7 @@
 }
 
 .tag-input {
-    width: 78px;
+    width: 78px !important;
     margin-right: 8px;
     vertical-align: top;
 }
@@ -27,15 +27,24 @@
     line-height: 150%;
 }
 
-.ant-upload-select-picture-card i {
-    color: #999;
-    font-size: 32px;
+.upload-list-inline .ant-upload-list-item {
+    float: left;
+    width: 200px;
+    margin-right: 8px;
 }
 
-.ant-upload-select-picture-card .ant-upload-text {
-    margin-top: 8px;
-    color: #666;
+.upload-list-inline [class*='-upload-list-rtl'] .ant-upload-list-item {
+    float: right;
 }
+
+.upload-list-inline .ant-upload-animate-enter {
+    animation-name: uploadAnimateInlineIn;
+}
+
+.upload-list-inline .ant-upload-animate-leave {
+    animation-name: uploadAnimateInlineOut;
+}
+
 .site-page-header {
     border: 1px solid rgb(235, 237, 240);
-  }
+}

@@ -27,3 +27,46 @@ export function reqGetUserLastOnline() {
     method: "get",
   });
 }
+
+// 获取所有用户信息
+export function reqGetAllUser() {
+  return request({
+    url: `${BASE_URL}/getuser`,
+    method: "get",
+  })
+}
+
+// 向指定用户发送一条通知
+export function reqAddMessageByUid(uid, value) {
+  return request({
+    url: `${BASE_URL}/addnewmessagebyid`,
+    method: "post",
+    data: {
+      uid, value
+    }
+  })
+}
+
+// 向指定用户发送一条通知
+export function reqAddMessageManyPeople(ids, value) {
+  return request({
+    url: `${BASE_URL}/addnewmessagetoall`,
+    method: "post",
+    data: {
+      ids, value
+    }
+  })
+}
+
+
+
+// 删除一位用户
+export function reqDeleteUserById(uid) {
+  return request({
+    url: `${BASE_URL}/deleteUserbyId`,
+    method: "delete",
+    data: {
+      uid
+    }
+  })
+}

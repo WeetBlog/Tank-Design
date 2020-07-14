@@ -6,70 +6,39 @@ import Row from 'antd/es/row'
 import Col from 'antd/es/col'
 import Button from 'antd/es/button'
 import Upload from 'antd/es/upload'
-import Modal from 'antd/es/modal'
 import Drawer from 'antd/es/drawer'
 import message from 'antd/es/message'
 import Avatar from 'antd/es/avatar'
 import Tag from 'antd/es/tag'
-import { PlusOutlined } from '@ant-design/icons';
+import { UploadOutlined } from '@ant-design/icons';
 import Alert from 'antd/es/alert'
+import { reqGetBlogInfoById,reqDeleteBlogImage } from '../../../api/blog'
 const { Option } = Select;
 const { Meta } = Card;
+
+
+
 export default class addBlogImage extends Component {
     state = {
-        previewVisible: false,
-        previewImage: '',
-        previewTitle: '',
-        fileList: [
-            // {
-            //     uid: '-1',
-            //     name: 'image.png',
-            //     status: 'done',
-            //     url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-            // }
-        ],
         flagUpload: -1,
         blog: {
-            blogtags: [
-                "个人",
-                "生活记录",
-                "其他"
-            ],
-            blogcontent: [
-                {
-                    content: "博客的段落内容，第1段",
-                    img: ["http://180.76.238.89:8111/boy.png"]
-                },
-                {
-                    content: "博客的段落内容，第2段",
-                    img: []
-                },
-                {
-                    content: "博客的段落内容，第3段",
-                    img: ["http://180.76.238.89:8111/boy.png"]
-                }
-            ],
-            _id: "5f0999537b61247f812fbd2e",
-            blogtime: "2020-07-11",
-            blogtype: 1,
-            blogtitle: "测试博客标题1",
-            blogmessage: "测试博客标题描述信息",
-            blogusername: "Tank",
-            bloguserimg: "http://180.76.238.89:8111/boy.png",
-            bloguserid: "1594452939045"
+            blogtags: [],
+            blogcontent: []
         },
         visible: false
     };
 
-    // 上传图片
-    getBase64 = (file) => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = error => reject(error);
-        });
+    getBlogInfo = async (id) => {
+        let blog = await reqGetBlogInfoById(id)
+        this.setState({
+            blog
+        })
     }
+    componentDidMount() {
+        this.getBlogInfo(this.props.match.params.id)
+
+    }
+
     // 图片上传前验证
     beforeUpload = (file) => {
         const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/webp';
@@ -83,24 +52,34 @@ export default class addBlogImage extends Component {
         return isJpgOrPng && isLt2M;
     }
 
-    handleCancel = () => this.setState({ previewVisible: false });
-    handlePreview = async file => {
-        if (!file.url && !file.preview) {
-            file.preview = await this.getBase64(file.originFileObj);
+    stateUpload = (info) => {
+        let {blog,flagUpload} = this.state
+        if (info.file.status !== 'uploading') {
+            if(info.file.status === "removed"){
+                reqDeleteBlogImage(blog._id,flagUpload,info.file.uid).then(res=>{
+                    if(res===1){
+                        message.success("删除成功")
+                        this.getBlogInfo(this.props.match.params.id)
+                    }else{
+                        message.error("删除失败")
+                    }
+                }).catch(err=>{
+                    message.error(err)
+                })
+            }
         }
-
-        this.setState({
-            previewImage: file.url || file.preview,
-            previewVisible: true,
-            previewTitle: file.name || file.url.substring(file.url.lastIndexOf('/') + 1),
-        });
-    };
-    handleChange = ({ fileList }) => this.setState({ fileList });
+        if (info.file.status === 'done') {
+            message.success("图片上传成功");
+            this.getBlogInfo(this.props.match.params.id)
+        } else if (info.file.status === 'error') {
+            message.error(`${info.file.name} file upload failed.`);
+        }
+    }
 
 
 
     // select选择
-    handleChange = (value) => {
+    handleChange1 = (value) => {
         this.setState({
             flagUpload: value
         })
@@ -121,13 +100,7 @@ export default class addBlogImage extends Component {
 
 
     render() {
-        const { previewVisible, previewImage, fileList, previewTitle, flagUpload, blog, visible } = this.state;
-        const uploadButton = (
-            <div>
-                <PlusOutlined />
-                <div className="ant-upload-text">上传图片</div>
-            </div>
-        );
+        const { flagUpload, blog, visible } = this.state;
         return (
             <>
                 <Row gutter={20}>
@@ -136,7 +109,7 @@ export default class addBlogImage extends Component {
                             <Card bodyStyle={{ fontSize: "20px", letterSpacing: "3px" }}>
                                 {blog.blogtitle}
                             </Card>
-                            <Select defaultValue="" style={{ width: 300 }} onChange={this.handleChange}>
+                            <Select defaultValue="" style={{ width: 300 }} onChange={this.handleChange1}>
                                 <Option value="" disabled>选择段落</Option>
                                 {blog.blogcontent.map((item, index) => (
                                     <Option value={index} key={index}> 第 {(index + 1)} 段</Option>
@@ -148,47 +121,42 @@ export default class addBlogImage extends Component {
                         </Space>
                     </Col>
                     <Col span="12">
-                        <div className="clearfix">
-
-                            {
-                                blog.blogcontent.map((item, index) => {
-
-                                    return (
-                                        <div key={index}>
-                                            <Alert message={`第 ${index + 1} 段内容图片`} type={flagUpload === index ?"info":"error"} style={{ margin: "10px 0" }} />
-                                            <Upload
-                                                action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-                                                listType="picture-card"
-                                                fileList={
-                                                    item.img.map((it, ind) => {
-                                                        return {
-                                                            uid: -ind,
-                                                            name: 'image.png',
-                                                            status: 'done',
-                                                            url: it,
-                                                        }
-                                                    })
+                        {
+                            blog.blogcontent.map((item, index) => (
+                                <div key={index}>
+                                    <Alert message={flagUpload === index ? `第 ${index + 1} 段内容图片` : `第 ${index + 1} 段内容图片（请选择段落）`} type={flagUpload === index ? "info" : "error"} style={{ margin: "10px 0" }} />
+                                    <Upload
+                                        action='http://180.76.238.89:8080/tank/fileUploadBlogImage'
+                                        listType='picture'
+                                        defaultFileList={
+                                            item.img.map((it, ind) => {
+                                                return {
+                                                    uid: ind,
+                                                    name: 'image.png',
+                                                    status: 'done',
+                                                    url: it,
                                                 }
-                                                beforeUpload={this.beforeUpload}
-                                                onPreview={this.handlePreview}
-                                                onChange={this.handleChange}
-                                                disabled={!(flagUpload === index)}
-                                            >
-                                                {fileList.length >= 8 ? null : uploadButton}
-                                            </Upload>
-                                        </div>
-                                    )
-                                })
-                            }
-                            <Modal
-                                visible={previewVisible}
-                                title={previewTitle}
-                                footer={null}
-                                onCancel={this.handleCancel}
-                            >
-                                <img alt="example" style={{ width: '100%' }} src={previewImage} />
-                            </Modal>
-                        </div>
+                                            })
+                                        }
+                                        data={{
+                                            bid: blog._id,
+                                            index
+                                        }}
+                                        onChange={this.stateUpload}
+                                        beforeUpload={this.beforeUpload}
+                                        className='upload-list-inline'
+                                        disabled={!(flagUpload === index)}
+                                    >
+                                        {
+                                            item.img.length >= 5 ? null :
+                                                <Button>
+                                                    <UploadOutlined /> 选择图片上传
+                                                </Button>
+                                        }
+                                    </Upload>
+                                </div>
+                            ))
+                        }
                     </Col>
                 </Row>
                 <Drawer
@@ -218,12 +186,12 @@ export default class addBlogImage extends Component {
                         </Card>
                     </Space>
                     {
-                        blog.blogcontent.map((item,index)=>(
+                        blog.blogcontent.map((item, index) => (
                             <Card key={index}>
                                 {item.content}
                                 {
-                                    item.img.map((item,index)=>(
-                                        <img key={index} width="100%" alt="tank" src={item}/>
+                                    item.img.map((item, index) => (
+                                        <img key={index} width="100%" alt="tank" src={item} />
                                     ))
                                 }
                             </Card>
