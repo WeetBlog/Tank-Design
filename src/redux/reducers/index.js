@@ -6,6 +6,7 @@ import user from './user'
 import {componentName} from '../../components/Main/redux'
 import {users} from '../../pages/User/redux'
 import {blogs} from '../../pages/Blog/redux'
+import {sort} from '../../pages/Sort/redux'
 
 
 export default combineReducers({
@@ -13,5 +14,6 @@ export default combineReducers({
     user,
     users,
     blogs,
-    componentName
+    componentName,
+    sort
 })

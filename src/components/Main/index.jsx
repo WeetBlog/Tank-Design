@@ -7,6 +7,7 @@ import { withRouter } from 'react-router-dom'
 
 import User from '../../pages/User'
 import Blog from '../../pages/Blog'
+import Sort from '../../pages/Sort'
 import Backend from '../../pages/Backend'
 
 import { Button } from 'antd';
@@ -66,6 +67,7 @@ class Main extends Component {
                             <Route path="/backend" component={Backend} />
                             <Route path="/user" component={User} />
                             <Route path="/blog" component={Blog} />
+                            <Route path="/sort" component={Sort} />
                             <Redirect to="/backend" />
                         </Switch>
                     </Suspense>

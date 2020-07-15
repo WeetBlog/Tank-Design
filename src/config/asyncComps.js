@@ -8,6 +8,10 @@ const Blog = () => lazy(()=> import('../pages/Blog'))
 const AddBlog = () => lazy(()=> import('../pages/Blog/components/addBlog'))
 const UpdateBlog = () => lazy(()=>import('../pages/Blog/components/UpdateBlog'))
 const UpdateBlogInfo = () => lazy(()=>import('../pages/Blog/components/UpdateBlogInfo'))
+const Sort = () => lazy(()=>import('../pages/Sort'))
+const ClassifyInfo = () => lazy(()=>import('../pages/Sort/components/ClassifyInfo'))
+const ClassifyManagement = () => lazy(()=>import('../pages/Sort/components/ClassifyManagement'))
+
 
 export default {
   Home,
@@ -17,5 +21,8 @@ export default {
   Blog,
   AddBlog,
   UpdateBlog,
-  UpdateBlogInfo
+  UpdateBlogInfo,
+  Sort,
+  ClassifyInfo,
+  ClassifyManagement
 };

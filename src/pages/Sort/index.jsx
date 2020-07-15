@@ -1,5 +1,6 @@
 import React, { Component, Suspense } from 'react'
 import { Switch, Route } from 'react-router-dom'
+
 import ClassifyManagement from './components/ClassifyManagement'
 import ClassifyInfo from './components/ClassifyInfo'
 

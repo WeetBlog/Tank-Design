@@ -118,8 +118,22 @@ class home extends Component {
                         })}>编写博客</Menu.Item>
                     </SubMenu>
                     <SubMenu className="mailTitle" key="sub3" icon={<NodeIndexOutlined />} title="分类管理">
-                        <Menu.Item key="9">所有分类</Menu.Item>
-                        <Menu.Item key="7">编辑分类</Menu.Item>
+                        <Menu.Item key="9" onClick={() => this.toRouter({
+                            address: "/sort/classifyinfo",
+                            componentName: {
+                                firstName: "分类管理",
+                                secondName: "所有分类",
+                                lastName: "",
+                            }
+                        })}>所有分类</Menu.Item>
+                        <Menu.Item key="7" onClick={() => this.toRouter({
+                            address: "/sort/classifymanagement",
+                            componentName: {
+                                firstName: "分类管理",
+                                secondName: "编辑分类",
+                                lastName: "",
+                            }
+                        })}>编辑分类</Menu.Item>
                     </SubMenu>
                     <SubMenu className="mailTitle" key="sub4" icon={<CommentOutlined />} title="记录管理">
                         <Menu.Item key="9">评论管理</Menu.Item>
