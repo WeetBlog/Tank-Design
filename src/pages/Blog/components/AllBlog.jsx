@@ -10,145 +10,36 @@ import Modal from 'antd/es/modal';
 import List from 'antd/es/list';
 import Avatar from 'antd/es/avatar';
 import { StarFilled, ReadOutlined } from '@ant-design/icons';
-
+import { getAllBlog } from '../redux/actions'
+import { reqGetBlogByType, reqGetUserLikeThisBlog } from '../../../api/blog/index'
+import { connect } from 'react-redux'
+import { message } from 'antd'
 
 const { Option } = Select;
-
-export default class AllBlog extends Component {
+@connect(
+    (state) => ({
+        blogs: state.blogs,
+    }),
+    { getAllBlog }
+)
+class AllBlog extends Component {
     state = {
         radioValue: true,
         sortValue: true,
-        blog: [
-            {
-                "blogseenum": 4,
-                "_id": "5f0999537b61247f812fbd2e",
-                "blogtime": "2020-07-14",
-                "blogtimenum": 1594464595349,
-                "blogtype": 2,
-                "blogtitle": "测试博客标题4",
-                "blogmessage": "修改后的描述",
-                "key": 1
-            },
-            {
-                "blogseenum": 7,
-                "_id": "5f0999537b61247f812fbd2e",
-                "blogtime": "2020-07-11",
-                "blogtimenum": 1594464595319,
-                "blogtype": 2,
-                "blogtitle": "测试博客标题1",
-                "blogmessage": "修改后的描述",
-                "key": 2
-            },
-            {
-                "blogseenum": 3,
-                "_id": "5f0999537b61247f812fbd2e",
-                "blogtime": "2020-07-12",
-                "blogtimenum": 1594464595329,
-                "blogtype": 2,
-                "blogtitle": "测试博客标题2",
-                "blogmessage": "修改后的描述",
-                "key": 3
-            },
-            {
-                "blogseenum": 6,
-                "_id": "5f0999537b61247f812fbd2e",
-                "blogtime": "2020-07-13",
-                "blogtimenum": 1594464595339,
-                "blogtype": 2,
-                "blogtitle": "测试博客标题3",
-                "blogmessage": "修改后的描述",
-                "key": 4
-            },
-            {
-                "blogseenum": 4,
-                "_id": "5f0999537b61247f812fbd2e",
-                "blogtime": "2020-07-14",
-                "blogtimenum": 1594464595349,
-                "blogtype": 2,
-                "blogtitle": "测试博客标题4",
-                "blogmessage": "修改后的描述",
-                "key": 1
-            },
-            {
-                "blogseenum": 7,
-                "_id": "5f0999537b61247f812fbd2e",
-                "blogtime": "2020-07-11",
-                "blogtimenum": 1594464595319,
-                "blogtype": 2,
-                "blogtitle": "测试博客标题1",
-                "blogmessage": "修改后的描述",
-                "key": 2
-            },
-            {
-                "blogseenum": 3,
-                "_id": "5f0999537b61247f812fbd2e",
-                "blogtime": "2020-07-12",
-                "blogtimenum": 1594464595329,
-                "blogtype": 2,
-                "blogtitle": "测试博客标题2",
-                "blogmessage": "修改后的描述",
-                "key": 3
-            },
-            {
-                "blogseenum": 6,
-                "_id": "5f0999537b61247f812fbd2e",
-                "blogtime": "2020-07-13",
-                "blogtimenum": 1594464595339,
-                "blogtype": 2,
-                "blogtitle": "测试博客标题3",
-                "blogmessage": "修改后的描述",
-                "key": 4
-            },
-            {
-                "blogseenum": 4,
-                "_id": "5f0999537b61247f812fbd2e",
-                "blogtime": "2020-07-14",
-                "blogtimenum": 1594464595349,
-                "blogtype": 2,
-                "blogtitle": "测试博客标题4",
-                "blogmessage": "修改后的描述",
-                "key": 1
-            },
-            {
-                "blogseenum": 7,
-                "_id": "5f0999537b61247f812fbd2e",
-                "blogtime": "2020-07-11",
-                "blogtimenum": 1594464595319,
-                "blogtype": 2,
-                "blogtitle": "测试博客标题1",
-                "blogmessage": "修改后的描述",
-                "key": 2
-            },
-            {
-                "blogseenum": 3,
-                "_id": "5f0999537b61247f812fbd2e",
-                "blogtime": "2020-07-12",
-                "blogtimenum": 1594464595329,
-                "blogtype": 2,
-                "blogtitle": "测试博客标题2",
-                "blogmessage": "修改后的描述",
-                "key": 3
-            },
-            {
-                "blogseenum": 6,
-                "_id": "5f0999537b61247f812fbd2e",
-                "blogtime": "2020-07-13",
-                "blogtimenum": 1594464595339,
-                "blogtype": 2,
-                "blogtitle": "测试博客标题3",
-                "blogmessage": "修改后的描述",
-                "key": 4
-            }
-        ],
+        blog: [],
         showBlog: []
     };
-
-    componentDidMount() {
+    getBlogInfo = async () => {
+        let blog = await this.props.getAllBlog((parseInt(sessionStorage.getItem('type'))), sessionStorage.getItem('token'))
+        this.setState({ blog })
         const { radioValue, sortValue } = this.state
         this.changeSortShowBlog(radioValue, sortValue)
     }
+    componentDidMount() {
+        this.getBlogInfo()
+    }
 
-
+    // 排序渲染数据
     changeSortShowBlog = (i, j) => {
         const { blog } = this.state
         let arr = blog.map((item, index) => {
@@ -193,7 +84,7 @@ export default class AllBlog extends Component {
     // 单选框
     onChangeRadio = e => {
         console.log(e.target.value);
-        const {sortValue } = this.state
+        const { sortValue } = this.state
         this.setState({
             radioValue: e.target.value,
         });
@@ -207,50 +98,61 @@ export default class AllBlog extends Component {
         this.changeSortShowBlog(radioValue, e.target.value)
     };
 
-    // 下拉框
-    handleChange = (value) => {
-        console.log(`selected ${value}`);
+
+    // 下拉框，博客类型
+    handleChange = async (value) => {
+        let utype = parseInt(sessionStorage.getItem('type'))
+        let uid = sessionStorage.getItem('token')
+        if (value) {
+            let blog = await reqGetBlogByType(value, utype, uid)
+            this.setState({ blog })
+            const { radioValue, sortValue } = this.state
+            this.changeSortShowBlog(radioValue, sortValue)
+        } else {
+            this.getBlogInfo()
+        }
     }
 
     // 收藏博客用户
-    getUserLike = () => {
-        Modal.info({
-            content:
-                <>
-                    <List
-                        itemLayout="horizontal"
-                        dataSource={[
-                            {
-                                title: "收藏这篇博客的用户如下",
-                            },
-                            {
-                                title: 'Ant Design Title 1',
-                                src:"https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png",
-                                desc:"Ant Design, a design language for background applications, is refined by Ant UED Team"
-                            },
-                            {
-                                title: 'Ant Design Title 1',
-                                src:"https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png",
-                                desc:"Ant Design, a design language for background applications, is refined by Ant UED Team"
-                            },
-                            {
-                                title: 'Ant Design Title 1',
-                                src:"https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png",
-                                desc:"Ant Design, a design language for background applications, is refined by Ant UED Team"
-                            },
-                        ]}
-                        renderItem={item => (
-                            <List.Item>
-                                <List.Item.Meta
-                                    avatar={item.src ? <Avatar src={item.src} />:""}
-                                    title={<a href="https://ant.design">{item.title}</a>}
-                                    description={item.desc ? item.desc:""}
-                                />
-                            </List.Item>
-                        )}
-                    />
-                </>,
-        });
+    getUserLike = (id) => {
+        reqGetUserLikeThisBlog(id).then(res => {
+            let list = res.map(item => {
+                return {
+                    title: item.uname,
+                    src: item.uimg,
+                    desc: item.udescription
+                }
+            })
+            if(list.length === 0){
+                list = [{title:"这篇博客未有任何人收藏"}]
+            }else{
+                list.unshift({
+                    title : "收藏这篇博客的用户如下"
+                })
+            }
+            
+            Modal.info({
+                content:
+                    <>
+                        <List
+                            itemLayout="horizontal"
+                            dataSource={list}
+                            renderItem={item => (
+                                <List.Item>
+                                    <List.Item.Meta
+                                        avatar={item.src ? <Avatar src={item.src} /> : ""}
+                                        title={<a href="https://ant.design">{item.title}</a>}
+                                        description={item.desc ? item.desc : ""}
+                                    />
+                                </List.Item>
+                            )}
+                        />
+                    </>,
+            });
+        }).catch(err => {
+            message.error(err)
+        })
+
     }
     render() {
         const { showBlog } = this.state
@@ -285,11 +187,11 @@ export default class AllBlog extends Component {
                 width: 200,
                 align: "center",
                 fixed: 'right',
-                render: () =>
+                render: (blog) =>
                     <>
                         <Space size="large">
                             <Tooltip placement="bottom" title="收藏家">
-                                <Button onClick={this.getUserLike} disabled={false} type="dashed" size="small" shape="circle" icon={<StarFilled />} />
+                                <Button onClick={() => this.getUserLike(blog._id)} disabled={false} type="dashed" size="small" shape="circle" icon={<StarFilled />} />
                             </Tooltip>
                             <Tooltip placement="bottom" title="阅读">
                                 <Button type="primary" size="small" ghost={true} shape="circle" icon={<ReadOutlined />} />
@@ -313,9 +215,11 @@ export default class AllBlog extends Component {
                         </Radio.Group>
                         <Select defaultValue="" style={{ width: 200, color: "orangered" }} onChange={this.handleChange}>
                             <Option value="" disabled style={{ color: "orange" }}>博客类型</Option>
-                            <Option value="jack">Jack</Option>
-                            <Option value="lucy">Lucy</Option>
-                            <Option value="Yiminghe">yiminghe</Option>
+                            <Option value={0}>所有博客</Option>
+                            <Option value={1}>学习技巧</Option>
+                            <Option value={2}>精选摘要</Option>
+                            <Option value={3}>生活记录</Option>
+                            <Option value={4}>其他</Option>
                         </Select>
                     </Space>
                 </Card>
@@ -327,3 +231,4 @@ export default class AllBlog extends Component {
         )
     }
 }
+export default AllBlog

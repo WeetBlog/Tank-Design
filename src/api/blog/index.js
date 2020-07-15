@@ -50,6 +50,7 @@ export function reqGetAllBlog( utype , uid ) {
 }
 
 
+
 // 获取所有博客tags
 export function reqUpdateBlogTags( id  , tags ) {
   return request({
@@ -68,6 +69,58 @@ export function reqUpdateRulesById( id , uid , rule ) {
     method: "put",
     data:{
       id , uid , rule
+    }
+  });
+}
+
+// 通过类型查看博客的信息
+export function reqGetBlogByType( type,utype,uid ) {
+  return request({
+    url: `${BASE_URL}/getblogeasybytype?type=${type}&utype=${utype}&uid=${uid}`,
+    method: "get"
+  });
+}
+
+// 获取收藏这篇博客的所有用户
+export function reqGetUserLikeThisBlog( id ) {
+  return request({
+    url: `${BASE_URL}/getuserslikethisblog?id=${id}`,
+    method: "get"
+  });
+}
+
+
+
+// 修改博客类型
+export function reqUpdateBlogType( id , type) {
+  return request({
+    url: `${BASE_URL}/updateblogtypebyid`,
+    method: "put",
+    data:{
+      id , type
+    }
+  });
+}
+
+// 修改博客内容
+export function reqUpdateBlogContent( uid , id , blog) {
+  return request({
+    url: `${BASE_URL}/updateblogbyid`,
+    method: "post",
+    data:{
+      uid , id , blog
+    }
+  });
+}
+
+
+// 删除博客
+export function reqDeleteBlogById( id , uid) {
+  return request({
+    url: `${BASE_URL}/deleteblog`,
+    method: "delete",
+    data:{
+      id , uid 
     }
   });
 }

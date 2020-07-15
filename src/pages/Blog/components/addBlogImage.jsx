@@ -52,6 +52,7 @@ export default class addBlogImage extends Component {
         return isJpgOrPng && isLt2M;
     }
 
+    // 图片上传
     stateUpload = (info) => {
         let {blog,flagUpload} = this.state
         if (info.file.status !== 'uploading') {

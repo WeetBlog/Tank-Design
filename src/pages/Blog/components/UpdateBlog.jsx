@@ -9,14 +9,16 @@ import Input from 'antd/es/input';
 import Modal from 'antd/es/modal';
 import message from 'antd/es/message';
 import Radio from 'antd/es/radio';
+import Popconfirm from 'antd/es/popconfirm';
+import Select from 'antd/es/select';
 import './index.css'
 import {
-    EditOutlined, DeleteOutlined, EyeTwoTone, TagOutlined, PlusOutlined, SyncOutlined
+    EditOutlined, DeleteOutlined, EyeTwoTone, TagOutlined, PlusOutlined, SyncOutlined, QuestionCircleOutlined
 } from '@ant-design/icons';
 import { connect } from 'react-redux'
 import { getAllBlog } from '../redux/actions'
-import { reqUpdateBlogTags ,reqUpdateRulesById} from '../../../api/blog'
-
+import { reqUpdateBlogTags, reqUpdateRulesById, reqDeleteBlogById, reqUpdateBlogType } from '../../../api/blog'
+const { Option } = Select;
 @connect(
     (state) => ({
         blogs: state.blogs,
@@ -34,17 +36,33 @@ class Blog extends Component {
         visible: false,
         blogId: "",
         blogTitle: "",
-        value:1
+        blogSee: 0,
+        selectType: "",
+    }
+
+    getBlogInfo = () => {
+        this.props.getAllBlog((parseInt(sessionStorage.getItem('type'))), sessionStorage.getItem('token'))
     }
 
     componentDidMount() {
-        this.props.getAllBlog(2, sessionStorage.getItem('token'))
+        this.getBlogInfo()
+    }
+
+    // 删除博客
+    deleteBlogById = async (id) => {
+        let result = await reqDeleteBlogById(id, sessionStorage.getItem('token'))
+        if (result === "删除成功") {
+            message.success("删除成功")
+            this.getBlogInfo()
+        } else {
+            message.error("删除失败，请稍后再试")
+        }
     }
 
     //切换组件
     handleTable = (text, record, index) => {
         PubSub.publish('changeComponent', {
-            address: `/blog/updateblog/info/${index}`,
+            address: `/blog/updateblog/info/${text._id}`,
             componentName: {
                 firstName: "我的博客",
                 secondName: "管理博客",
@@ -55,47 +73,50 @@ class Blog extends Component {
 
     // 权限弹窗
     showModal = (text) => {
+        let num = text.blogseeall ? 1 : text.blogseevip ? 2 : 3
         this.setState({
             visible: true,
             recordKey: "",
-            blogId:text._id,
-            blogTitle: text.blogtitle
+            blogId: text._id,
+            blogTitle: text.blogtitle,
+            blogSee: num
         });
     };
 
     onChangeRadio = (e) => {
-        console.log('radio checked', e.target.value);
+        // console.log('radio checked', e.target.value);
         this.setState({
-            value: e.target.value,
+            blogSee: e.target.value,
         });
     }
 
     handleOk = async () => {
-        let {blogId,value} = this.state
+        let { blogId, blogSee } = this.state
         let rule = {}
-        if(value === 1){
-            rule= {
-                blogseeadmin:true,
-                blogseevip:true,
-                blogseeall:true
+        if (blogSee === 1) {
+            rule = {
+                blogseeadmin: true,
+                blogseevip: true,
+                blogseeall: true
             }
-        }else if(value === 2){
-            rule= {
-                blogseeadmin:true,
-                blogseevip:true,
-                blogseeall:false
+        } else if (blogSee === 2) {
+            rule = {
+                blogseeadmin: true,
+                blogseevip: true,
+                blogseeall: false
             }
-        }else if(value === 3){
-            rule= {
-                blogseeadmin:true,
-                blogseevip:false,
-                blogseeall:false
+        } else if (blogSee === 3) {
+            rule = {
+                blogseeadmin: true,
+                blogseevip: false,
+                blogseeall: false
             }
         }
-        let result = await reqUpdateRulesById(blogId,sessionStorage.getItem('token'),rule)
-        if(result === "设置成功"){
+        let result = await reqUpdateRulesById(blogId, sessionStorage.getItem('token'), rule)
+        if (result === "设置成功") {
             message.success("设置成功")
-        }else{
+            this.getBlogInfo()
+        } else {
             message.error("设置失败，请稍后再试")
         }
         this.setState({
@@ -104,9 +125,8 @@ class Blog extends Component {
     };
 
     handleCancel = e => {
-        console.log(e);
         this.setState({
-            visible: false,
+            visible: false
         });
     };
 
@@ -136,7 +156,7 @@ class Blog extends Component {
             let result = await reqUpdateBlogTags(blog._id, this.state.tags)
             if (result === "修改成功") {
                 message.success("修改成功")
-                this.props.getAllBlog(2, sessionStorage.getItem('token'))
+                this.getBlogInfo()
             } else {
                 message.error("修改失败")
             }
@@ -146,7 +166,6 @@ class Blog extends Component {
 
         this.setState({ recordKey: "" })
     }
-
 
     handleClose = removedTag => {
         const tags = this.state.tags.filter(tag => tag !== removedTag);
@@ -201,8 +220,28 @@ class Blog extends Component {
         this.editInput = input;
     };
 
+    // 切换博客类型
+    handleType = (index) => {
+        this.setState({
+            selectType: index
+        })
+    }
+    handleChange = async (value) => {
+        let { selectType } = this.state
+        let result = await reqUpdateBlogType(selectType,value)
+        if(result === "修改成功"){
+            message.success("修改成功")
+            this.getBlogInfo()
+            this.setState({
+                selectType: ""
+            })
+        }else{
+            message.error("修改失败")
+        }
+    }
+
     render() {
-        let { recordKey, tags, inputVisible, inputValue, editInputIndex, editInputValue, blogTitle } = this.state
+        let { selectType, recordKey, tags, inputVisible, inputValue, editInputIndex, editInputValue, blogTitle, blogSee } = this.state
         const columns = [
             {
                 title: '博客日期',
@@ -213,9 +252,19 @@ class Blog extends Component {
                 fixed: 'left',
             },
             {
+                title: '博客标题',
+                dataIndex: 'blogtitle',
+                key: '2',
+                width: 300,
+            },
+            {
+                title: '博客描述',
+                dataIndex: 'blogmessage',
+                key: '4'
+            },
+            {
                 title: '标签',
                 key: '1',
-                fixed: 'left',
                 align: "center",
                 width: 250,
                 render: (text, record, index) => (
@@ -296,16 +345,40 @@ class Blog extends Component {
                 )
             },
             {
-                title: '博客标题',
-                dataIndex: 'blogtitle',
-                key: '2',
-                fixed: 'left',
-                width: 300,
+                title: '博客类型',
+                key: '7',
+                width: 120,
+                align: "center",
+                render: (text, record, index) => (
+                    selectType === text._id ?
+                        <>
+                            <Select defaultValue={text.blogtype} style={{ width: 100 }} onChange={this.handleChange}>
+                                <Option value={1}>学习技巧</Option>
+                                <Option value={2}>精选摘要</Option>
+                                <Option value={3}>生活记录</Option>
+                                <Option value={4}>其他</Option>
+                            </Select>
+                        </>
+                        : <>
+                            <div onClick={() => this.handleType(text._id)}>
+                                {text.blogtype === 1 ? "学习技巧" :
+                                    text.blogtype === 2 ? "精选摘要" :
+                                        text.blogtype === 3 ? "生活记录" : "其他"}
+                            </div>
+                        </>
+
+                )
             },
             {
-                title: '博客描述',
-                dataIndex: 'blogmessage',
-                key: '4'
+                title: '博客权限',
+                key: '6',
+                width: 120,
+                align: "center",
+                render: (text, record, index) => (
+                    <>
+                        {text.blogseeall ? "所有人可见" : text.blogseevip ? "VIP可见" : "仅管理员可见"}
+                    </>
+                )
             },
             {
                 title: '操作',
@@ -337,7 +410,9 @@ class Blog extends Component {
                                 <Button size="small" onClick={() => this.showModal(text)} type="default" shape="circle" icon={<EyeTwoTone twoToneColor="#CE9178" />}></Button>
                             </Tooltip>
                             <Tooltip placement="bottom" title="删除">
-                                <Button type="danger" onClick={() => this.setState({ recordKey: "" })} size="small" shape="circle" icon={<DeleteOutlined />}></Button>
+                                <Popconfirm onConfirm={() => this.deleteBlogById(text._id)} title={`确认删除《${text.blogtitle}》吗？`} placement="topRight" icon={<QuestionCircleOutlined style={{ color: 'red' }} />}>
+                                    <Button type="danger" onClick={() => this.setState({ recordKey: "" })} size="small" shape="circle" icon={<DeleteOutlined />}></Button>
+                                </Popconfirm>
                             </Tooltip>
                         </Space>
                         <Modal
@@ -346,9 +421,12 @@ class Blog extends Component {
                             onOk={this.handleOk}
                             onCancel={this.handleCancel}
                         >
-                            <Radio.Group onChange={this.onChangeRadio} value={this.state.value}>
+                            <Radio.Group
+                                onChange={this.onChangeRadio}
+                                value={blogSee}
+                            >
                                 <Radio value={1}>所有人课件</Radio>
-                                <Radio value={2}>vip课件</Radio>
+                                <Radio value={2}>vip可见</Radio>
                                 <Radio value={3}>仅管理员可见</Radio>
                             </Radio.Group>
                         </Modal>
@@ -364,7 +442,7 @@ class Blog extends Component {
         })
         return (
             <>
-                <Table columns={columns} dataSource={arr} scroll={{ x: 1350 }} />
+                <Table columns={columns} dataSource={arr} scroll={{ x: 1500 }} />
             </>
         )
     }

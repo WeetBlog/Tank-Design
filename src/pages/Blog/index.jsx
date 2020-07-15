@@ -16,7 +16,7 @@ export default class Blog extends Component {
                         <Route path="/blog/addblog" component={AddBlog} exact/>
                         <Route path="/blog/addblog/image/:id" component={AddBlogIamge} />
                         <Route path="/blog/updateblog" component={UpdateBlog} exact/>
-                        <Route path="/blog/updateblog/info" component={UpdateBlogInfo} />
+                        <Route path="/blog/updateblog/info/:id" component={UpdateBlogInfo} />
                         <Route path="/blog/allblog" component={AllBlog} />
                     </Switch>
                 </Suspense>

@@ -8,10 +8,11 @@ import Upload from 'antd/es/upload'
 import Modal from 'antd/es/modal'
 import message from 'antd/es/message'
 import Alert from 'antd/es/alert'
+import notification from 'antd/es/notification'
 
 import './index.css'
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-
+import { reqGetBlogInfoById, reqUpdateBlogContent, reqDeleteBlogImage } from '../../../api/blog'
 
 
 export default class UpdateBlogInfo extends Component {
@@ -19,21 +20,32 @@ export default class UpdateBlogInfo extends Component {
         previewVisible: false,
         previewImage: '',
         previewTitle: '',
-        fileList: [
-            {
-                uid: '-1',
-                name: 'image.png',
-                status: 'done',
-                url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-            },
-            {
-                uid: '-2',
-                name: 'image.png',
-                status: 'done',
-                url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-            }
-        ],
+        blog: {},
+        content: [],
+        img: [],
+        uploadIndex: "",
     };
+
+    getBlogInfo = async (id) => {
+        let blog = await reqGetBlogInfoById(id)
+        let content = blog.blogcontent.map(item => {
+            return item.content
+        })
+        let img = blog.blogcontent.map(item => {
+            return item.img
+        })
+        this.setState({
+            blog, content, img
+        })
+
+    }
+    componentDidMount() {
+        this.getBlogInfo(this.props.match.params.id)
+
+    }
+
+
+
     handleCancel = () => this.setState({ previewVisible: false });
 
     handlePreview = async file => {
@@ -48,8 +60,8 @@ export default class UpdateBlogInfo extends Component {
         });
     };
 
-    handleChange = ({ fileList }) => this.setState({ fileList });
-    
+    // handleChange = ({ fileList }) => this.setState({ fileList });
+
     // 上传结果的promise
     getBase64 = (file) => {
         return new Promise((resolve, reject) => {
@@ -62,7 +74,7 @@ export default class UpdateBlogInfo extends Component {
 
     // 图片上传前验证
     beforeUpload = (file) => {
-        const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png'|| file.type === 'image/webp';
+        const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/webp';
         if (!isJpgOrPng) {
             message.error('抱歉，只支持上传 JPG/PNG/webp 的文件!');
         }
@@ -73,16 +85,75 @@ export default class UpdateBlogInfo extends Component {
         return isJpgOrPng && isLt2M;
     }
 
+    changeUploadIndex = (index) => {
+        this.setState({
+            uploadIndex: index
+        })
+    }
+
+    // 图片上传
+    stateUpload = (info) => {
+        console.log(info.file.status);
+        let { blog, uploadIndex } = this.state
+        if (info.file.status !== 'uploading') {
+            if (info.file.status === "removed") {
+                reqDeleteBlogImage(blog._id, uploadIndex, info.file.uid).then(res => {
+                    if (res === 1) {
+                        message.success("删除成功")
+                        this.getBlogInfo(this.props.match.params.id)
+                    } else {
+                        message.error("删除失败")
+                    }
+                }).catch(err => {
+                    message.error(err)
+                })
+            }
+        }
+        if (info.file.status === 'done') {
+            message.success("图片上传成功");
+            this.getBlogInfo(this.props.match.params.id)
+        } else if (info.file.status === 'error') {
+            message.error(`${info.file.name} file upload failed.`);
+        }
+    }
+
     // 表单
-    onFinish = values => {
-        // console.log('Success:', values);
-        // if (!values.blogContent) {
-        //     notification['error']({
-        //         message: '发布博客失败',
-        //         description:
-        //             '检测发现您没有添加任何段落，请至少添加一段段落内容才可发布博客',
-        //     })
-        // }
+    onFinish = async values => {
+        console.log('Success:', values);
+        let { blog } = this.state
+        let img = blog.blogcontent.map(item => {
+            return item.img
+        })
+        let uid = sessionStorage.getItem('token')
+        let arr = []
+        if (values.blogcontent.length < img.length && img[img.length - 1].length === 0) {
+            img = img[img.length - 1].length - 1
+        } else if(values.blogcontent.length < img.length) {
+            notification['error']({
+                message: '修改失败',
+                description:
+                    '您无法删除还存在图片的段落，请先删除图片再删除该段落',
+            });
+            return 
+        }
+        for (let i = 0; i < values.blogcontent.length; i++) {
+            arr.push({
+                content: values.blogcontent[i],
+                img: img[i] ? img[i] : []
+            })
+        }
+        let obj = {
+            blogmessage: values.blogmessage,
+            blogcontent: arr
+        }
+        console.log(obj)
+        let result = await reqUpdateBlogContent(uid, blog._id, obj)
+        if (result === "修改成功") {
+            message.success("修改成功")
+            this.getBlogInfo(this.props.match.params.id)
+        } else {
+            message.error("修改失败，请稍后再试")
+        }
     };
     render() {
         const { TextArea } = Input;
@@ -102,142 +173,150 @@ export default class UpdateBlogInfo extends Component {
                 sm: { span: 20, offset: 4 },
             },
         };
-
         // 上传图片
-        const { previewVisible, previewImage, fileList, previewTitle } = this.state;
+        const { previewVisible, previewImage, previewTitle, blog, content, img, uploadIndex } = this.state;
         const uploadButton = (
             <div>
                 <PlusOutlined />
-                <div className="ant-upload-text">Upload</div>
+                <div className="ant-upload-text" onClick={this.getUploadIndex}>Upload</div>
             </div>
         );
         return (
             <>
                 <Row gutter={16}>
                     <Col span="12">
-                        <Form
-                            name="basic"
-                            onFinish={this.onFinish}
-                            initialValues={
-                                {
-                                    blogTitle: "1",
-                                    blogBrief: "2",
-                                    blogContent: ["1", "2"]
-                                }
-                            }
-                        >
-                            <Form.Item
-                                name="blogTitle"
-                            >
-                                <Input size="large" disabled placeholder="博客标题" ></Input>
-                            </Form.Item>
-                            <Form.Item
-                                name="blogBrief"
-                                rules={[{ required: true, message: '请简单描述这篇博客......', },]}
-                            >
-                                <TextArea placeholder="博客的描述内容" row={4} autoSize={{ minRows: 2, maxRows: 3 }} />
-                            </Form.Item>
-                            {/* 段落 */}
-                            <Form.List name="blogContent">
-                                {(fields, { add, remove }) => {
-                                    return (
-                                        <div>
-                                            {fields.map((field, index) => (
-                                                <Form.Item
-                                                    {...(index === 0 ? formItemLayout : formItemLayoutWithOutLabel)}
-                                                    label={index === 0 ? '段落内容' : ''}
-                                                    required={false}
-                                                    key={field.key}
-                                                >
-                                                    <Form.Item
-                                                        {...field}
-                                                        validateTrigger={['onChange', 'onBlur']}
-                                                        rules={[
-                                                            {
-                                                                required: true,
-                                                                whitespace: true,
-                                                                message: "段落内容不能为空",
-                                                            },
-                                                        ]}
-                                                        noStyle
-                                                    >
-                                                        <TextArea placeholder="write here ....." autoSize={{ minRows: 4, maxRows: 7 }} />
-                                                    </Form.Item>
-                                                    {fields.length > 1 ? (
-                                                        <MinusCircleOutlined
-                                                            className="dynamic-delete-button"
-                                                            style={{ margin: '0 8px' }}
+                        {
+                            content.length !== 0 ?
+                                <Form
+                                    name="basic"
+                                    onFinish={this.onFinish}
+                                    initialValues={
+                                        {
+                                            blogTitle: blog.blogtitle,
+                                            blogmessage: blog.blogmessage,
+                                            blogcontent: content
+                                        }
+                                    }
+                                >
+                                    <Form.Item
+                                        name="blogTitle"
+                                    >
+                                        <Input size="large" disabled placeholder="博客标题" ></Input>
+                                    </Form.Item>
+                                    <Form.Item
+                                        name="blogmessage"
+                                        rules={[{ required: true, message: '请简单描述这篇博客......', },]}
+                                    >
+                                        <TextArea placeholder="博客的描述内容" row={4} autoSize={{ minRows: 2, maxRows: 3 }} />
+                                    </Form.Item>
+                                    {/* 段落 */}
+                                    <Form.List name="blogcontent">
+                                        {(fields, { add, remove }) => {
+                                            return (
+                                                <div>
+                                                    {fields.map((field, index) => (
+                                                        <Form.Item
+                                                            {...(index === 0 ? formItemLayout : formItemLayoutWithOutLabel)}
+                                                            label={index === 0 ? '段落内容' : ''}
+                                                            required={false}
+                                                            key={field.key}
+                                                        >
+                                                            <Form.Item
+                                                                {...field}
+                                                                validateTrigger={['onChange', 'onBlur']}
+                                                                rules={[
+                                                                    {
+                                                                        required: true,
+                                                                        whitespace: true,
+                                                                        message: "段落内容不能为空",
+                                                                    },
+                                                                ]}
+                                                                noStyle
+                                                            >
+                                                                <TextArea placeholder="write here ....." autoSize={{ minRows: 4, maxRows: 7 }} />
+                                                            </Form.Item>
+                                                            {fields.length > img.length - 1 ? (
+                                                                <MinusCircleOutlined
+                                                                    className="dynamic-delete-button"
+                                                                    style={{ margin: '0 8px' }}
+                                                                    onClick={() => {
+                                                                        remove(field.name);
+                                                                    }}
+                                                                />
+                                                            ) : null}
+                                                        </Form.Item>
+                                                    ))}
+                                                    <Form.Item>
+                                                        <Button
+                                                            type="dashed"
                                                             onClick={() => {
-                                                                remove(field.name);
+                                                                add();
                                                             }}
-                                                        />
-                                                    ) : null}
-                                                </Form.Item>
-                                            ))}
-                                            <Form.Item>
-                                                <Button
-                                                    type="dashed"
-                                                    onClick={() => {
-                                                        add();
-                                                    }}
-                                                    style={{ width: '60%' }}
-                                                >
-                                                    <PlusOutlined /> 新增一段
+                                                            style={{ width: '60%' }}
+                                                        >
+                                                            <PlusOutlined /> 新增一段
                                                 </Button>
-                                            </Form.Item>
-                                        </div>
-                                    );
-                                }}
-                            </Form.List>
-                            <Form.Item>
-                                <Button type="primary" htmlType="submit">
-                                    发布博客
+                                                    </Form.Item>
+                                                </div>
+                                            );
+                                        }}
+                                    </Form.List>
+                                    <Form.Item>
+                                        <Button type="primary" htmlType="submit">
+                                            修改博客
                                 </Button>
-                            </Form.Item>
-                        </Form>
+                                    </Form.Item>
+                                </Form>
+                                :
+                                null
+                        }
                     </Col>
                     <Col span="12">
                         <div className="clearfix">
-                            <Alert message="第1段内容图片" type="info" style={{margin:"10px 0"}} />
-                            <Upload
-                                action="http://180.76.238.89:8080/tank/fileUploadBlogImage"
-                                listType="picture-card"
-                                data={{uid:"abcd"}}
-                                fileList={fileList}
-                                beforeUpload={this.beforeUpload}
-                                onPreview={this.handlePreview}
-                                onChange={this.handleChange}
-                            >
-                                {fileList.length >= 5 ? null : uploadButton}
-                            </Upload>
+                            {
+                                img ?
+                                    img.map((item, num) => (
+                                        <div key={num}>
+                                            <Alert
+                                                onClick={() => this.changeUploadIndex(num)} message={`选择第 ${(num + 1)}段`}
+                                                type={uploadIndex === num ? "info" : "error"} style={{ margin: "10px 0", cursor: "pointer" }} />
+                                            <Upload
+                                                action="http://180.76.238.89:8080/tank/fileUploadBlogImage"
+                                                listType="picture-card"
+                                                data={{
+                                                    bid: blog._id,
+                                                    index: num
+                                                }}
+                                                fileList={
+                                                    item ?
+                                                        item.map((item, index) => {
+                                                            return {
+                                                                uid: -index,
+                                                                name: 'image.png',
+                                                                status: 'done',
+                                                                url: item,
+                                                            }
+                                                        }) : null
+                                                }
+                                                onChange={this.stateUpload}
+                                                beforeUpload={this.beforeUpload}
+                                                onPreview={this.handlePreview}
+                                                disabled={uploadIndex === num ? false : true}
+                                            >
+                                                {!item ? uploadButton : item.length >= 5 ? null : uploadButton}
 
-                            <Alert message="第2段内容图片" type="info" style={{margin:"10px 0"}} />
-                            <Upload
-                                action="http://180.76.238.89:8080/tank/fileUploadBlogImage"
-                                listType="picture-card"
-                                data={{uid:"abcd"}}
-                                fileList={fileList}
-                                beforeUpload={this.beforeUpload}
-                                onPreview={this.handlePreview}
-                                onChange={this.handleChange}
-                                progress={null}
-                            >
-                                {fileList.length >= 5 ? null : uploadButton}
-                            </Upload>
+                                            </Upload>
+                                        </div>
+                                    )) :
+                                    null
+                            }
 
-                            <Alert message="第3段内容图片" type="info" style={{margin:"10px 0"}} />
-                            <Upload
-                                action="http://180.76.238.89:8080/tank/fileUploadBlogImage"
-                                listType="picture-card"
-                                data={{uid:"abcd"}}
-                                fileList={fileList}
-                                beforeUpload={this.beforeUpload}
-                                onPreview={this.handlePreview}
-                                onChange={this.handleChange}
-                                progress={null}
-                            >
-                                {fileList.length >= 5 ? null : uploadButton}
-                            </Upload>
+
+
+
+
+
+
                             <Modal
                                 visible={previewVisible}
                                 title={previewTitle}

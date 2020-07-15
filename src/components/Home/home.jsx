@@ -118,7 +118,7 @@ class home extends Component {
                         })}>编写博客</Menu.Item>
                     </SubMenu>
                     <SubMenu className="mailTitle" key="sub3" icon={<NodeIndexOutlined />} title="分类管理">
-                        <Menu.Item key="9">添加分类</Menu.Item>
+                        <Menu.Item key="9">所有分类</Menu.Item>
                         <Menu.Item key="7">编辑分类</Menu.Item>
                     </SubMenu>
                     <SubMenu className="mailTitle" key="sub4" icon={<CommentOutlined />} title="记录管理">
