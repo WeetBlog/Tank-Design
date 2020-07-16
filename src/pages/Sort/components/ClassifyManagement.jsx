@@ -7,28 +7,28 @@ import Modal from 'antd/es/modal';
 import Input from 'antd/es/input';
 import message from 'antd/es/message';
 import Checkbox from 'antd/es/checkbox';
-import { PlusOutlined, DeleteOutlined,HighlightOutlined } from '@ant-design/icons';
+import { PlusOutlined, DeleteOutlined, HighlightOutlined } from '@ant-design/icons';
 
 import { connect } from 'react-redux'
 import { getAllSort } from '../redux/acitons'
 import { getAllBlog } from '../../Blog/redux/actions'
-import { reqRuleSortNam,reqAddSort} from '../../../api/sort'
+import { reqRuleSortNam, reqAddSort, reqDeleteSort } from '../../../api/sort'
 
 @connect(
     (state) => ({
         sort: state.sort
     }),
-    { getAllSort,getAllBlog }
+    { getAllSort, getAllBlog }
 )
 class ClassifyManagement extends Component {
     state = {
         selectedRowKeys: [], // Check here to configure the default column
         loading: false,
         sort: [],
-        blog : [],
+        blog: [],
         visible: false,
-        addValue:"",
-        addvalueRule:"",
+        addValue: "",
+        addvalueRule: "",
     };
 
     // 添加分类
@@ -38,58 +38,62 @@ class ClassifyManagement extends Component {
         });
     };
 
-    // 校验分类名称是否重复
-    ruleName = async ()=>{
-        let {addValue} = this.state
-        if(addValue.trim()){
-            let result = await reqRuleSortNam(addValue)
-            if(result!==1){
-                this.setState({
-                    addvalueRule : "分类名已重复",
-                    addValue:""
-                })
-            }
-        }else{
-            this.setState({
-                addvalueRule : "请输入分类名称",
-            })
-        }
-        
-    }
-
     handleOk = async () => {
-        let {addValue} = this.state
-        let result = await reqAddSort(addValue)
-        if(result === 1){
-            message.success("添加成功")
-            this.getAllSort()
+        let { addValue } = this.state
+        if (addValue.trim()) {
+            let result = await reqRuleSortNam(addValue)
+            if (result !== 1) {
+                this.setState({
+                    addvalueRule: "分类名已重复",
+                })
+            } else {
+                let result2 = await reqAddSort(addValue)
+                if (result2 === 1) {
+                    message.success("添加成功")
+                    this.getAllSort()
+                    this.setState({
+                        addValue: "",
+                        addvalueRule: "",
+                        visible: false,
+                    })
+                } else {
+                    message.error("添加失败，请稍后再试")
+                    this.setState({
+                        addValue: "",
+                        addvalueRule: ""
+                    })
+                }
+            }
+        } else {
             this.setState({
-                addValue:""
+                addvalueRule: "请输入分类名称",
             })
-        }else{
-            message.error("添加失败，请稍后再试")
         }
-        this.setState({
-            visible: false,
-        });
     };
 
     handleCancel = e => {
-        console.log(e);
         this.setState({
             visible: false,
+            addValue: "",
+            addvalueRule: ""
         });
     };
 
     // 删除的请求
-    start = () => {
+    start = async () => {
+        let { selectedRowKeys } = this.state
         this.setState({ loading: true });
-        setTimeout(() => {
-            this.setState({
-                selectedRowKeys: [],
-                loading: false,
-            });
-        }, 1000);
+        let result = await reqDeleteSort(selectedRowKeys)
+        if (result === 1) {
+            message.success("删除成功")
+        } else {
+            message.error("删除失败，请稍后再试")
+        }
+        this.getAllSort()
+        this.setState({
+            selectedRowKeys: [],
+            loading: false,
+        });
     };
 
     // 刷新页面，重新获取数据
@@ -98,7 +102,7 @@ class ClassifyManagement extends Component {
         let sort = await this.props.getAllSort()
         let blog = await this.props.getAllBlog((parseInt(sessionStorage.getItem('type'))), sessionStorage.getItem('token'))
         this.setState({
-            sort,blog
+            sort, blog
         })
     }
 
@@ -108,15 +112,14 @@ class ClassifyManagement extends Component {
 
     // 选中分类的回调
     onSelectChange = selectedRowKeys => {
-        console.log('selectedRowKeys changed: ', selectedRowKeys);
         this.setState({ selectedRowKeys });
     };
 
-    test = (checked, record, index, originNode)=>{
-        let {blog} = this.state
-        let arr = blog.map(item=>item.blogtype)
+    test = (checked, record, index, originNode) => {
+        let { blog } = this.state
+        let arr = blog.map(item => item.blogtype)
         let result = arr.indexOf(record.stype)
-        return result !== -1 ? null : originNode
+        return result !== -1 ? <Checkbox defaultChecked={false} disabled /> : originNode
     }
     render() {
 
@@ -126,11 +129,12 @@ class ClassifyManagement extends Component {
                 dataIndex: 'sname',
             }
         ];
-        const { loading, selectedRowKeys, sort,addValue,addvalueRule } = this.state;
+        const { loading, selectedRowKeys, sort, addValue, addvalueRule } = this.state;
         const rowSelection = {
             selectedRowKeys,
+            hideSelectAll: true,
             onChange: this.onSelectChange,
-            renderCell:(checked, record, index, originNode)=>this.test(checked, record, index, originNode)
+            renderCell: (checked, record, index, originNode) => this.test(checked, record, index, originNode)
         };
         const hasSelected = selectedRowKeys.length > 0;
 
@@ -146,23 +150,22 @@ class ClassifyManagement extends Component {
                             visible={this.state.visible}
                             onOk={this.handleOk}
                             onCancel={this.handleCancel}
-                            okButtonProps={{ disabled: addValue.trim() && addvalueRule==="" ? false : true }}
+                            okButtonProps={{ disabled: addValue.trim() && addvalueRule === "" ? false : true }}
                         >
-                            <Input size="large" 
-                                value={addValue} 
-                                onChange={(e)=>this.setState({addValue:e.target.value.trim()})}  
-                                onBlur={this.ruleName} 
-                                onFocus={()=>this.setState({addvalueRule:""})}
-                                placeholder="large size" 
+                            <Input size="large"
+                                value={addValue}
+                                onChange={(e) => this.setState({ addValue: e.target.value.trim() })}
+                                onFocus={() => this.setState({ addvalueRule: "" })}
+                                placeholder="large size"
                                 prefix={<HighlightOutlined />} />
-                            { addvalueRule? <span style={{color:"red"}}>{addvalueRule}</span>:"" }
+                            {addvalueRule ? <span style={{ color: "red" }}>{addvalueRule}</span> : ""}
                         </Modal>
                     </>
                 )}>
                     <div>
                         <div style={{ marginBottom: 16 }}>
                             <Button icon={<DeleteOutlined />} danger type="primary" onClick={this.start} disabled={!hasSelected} loading={loading}>
-                                Delete All
+                                批量删除
                             </Button>
                             <span style={{ marginLeft: 8 }}>
                                 {hasSelected ? `已选择 ${selectedRowKeys.length} 个分类` : ''}

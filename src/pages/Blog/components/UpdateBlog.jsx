@@ -11,7 +11,7 @@ import message from 'antd/es/message';
 import Radio from 'antd/es/radio';
 import Popconfirm from 'antd/es/popconfirm';
 import Select from 'antd/es/select';
-import './index.css'
+import '../css/index.css'
 import {
     EditOutlined, DeleteOutlined, EyeTwoTone, TagOutlined, PlusOutlined, SyncOutlined, QuestionCircleOutlined
 } from '@ant-design/icons';
@@ -22,6 +22,7 @@ const { Option } = Select;
 @connect(
     (state) => ({
         blogs: state.blogs,
+        sort : state.sort
     }),
     { getAllBlog }
 )
@@ -228,19 +229,20 @@ class Blog extends Component {
     }
     handleChange = async (value) => {
         let { selectType } = this.state
-        let result = await reqUpdateBlogType(selectType,value)
-        if(result === "修改成功"){
+        let result = await reqUpdateBlogType(selectType, value)
+        if (result === "修改成功") {
             message.success("修改成功")
             this.getBlogInfo()
             this.setState({
                 selectType: ""
             })
-        }else{
+        } else {
             message.error("修改失败")
         }
     }
 
     render() {
+        let {sort} = this.props
         let { selectType, recordKey, tags, inputVisible, inputValue, editInputIndex, editInputValue, blogTitle, blogSee } = this.state
         const columns = [
             {
@@ -353,10 +355,9 @@ class Blog extends Component {
                     selectType === text._id ?
                         <>
                             <Select defaultValue={text.blogtype} style={{ width: 100 }} onChange={this.handleChange}>
-                                <Option value={1}>学习技巧</Option>
-                                <Option value={2}>精选摘要</Option>
-                                <Option value={3}>生活记录</Option>
-                                <Option value={4}>其他</Option>
+                                {sort.map((item, index) => (
+                                    <Option key={index} value={item.stype}>{item.sname}</Option>
+                                ))}
                             </Select>
                         </>
                         : <>

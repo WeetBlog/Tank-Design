@@ -31,3 +31,14 @@ export function reqRuleSortNam(sname) {
     }
   });
 }
+
+// 批量删除分类
+export function reqDeleteSort(ids) {
+  return request({
+    url: `${BASE_URL}/deletesort`,
+    method: "delete",
+    data:{
+      ids
+    }
+  });
+}

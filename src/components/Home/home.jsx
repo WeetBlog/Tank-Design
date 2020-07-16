@@ -136,9 +136,30 @@ class home extends Component {
                         })}>编辑分类</Menu.Item>
                     </SubMenu>
                     <SubMenu className="mailTitle" key="sub4" icon={<CommentOutlined />} title="记录管理">
-                        <Menu.Item key="9">评论管理</Menu.Item>
-                        <Menu.Item key="7">新增记录</Menu.Item>
-                        <Menu.Item key="8">记录管理</Menu.Item>
+                        <Menu.Item key="10" onClick={() => this.toRouter({
+                            address: "/message/messageinfo",
+                            componentName: {
+                                firstName: "记录管理",
+                                secondName: "评论管理",
+                                lastName: "",
+                            }
+                        })}>评论管理</Menu.Item>
+                        <Menu.Item key="11" onClick={() => this.toRouter({
+                            address: "/message/addrecord",
+                            componentName: {
+                                firstName: "记录管理",
+                                secondName: "新增简记",
+                                lastName: "",
+                            }
+                        })}>新增简记</Menu.Item>
+                        <Menu.Item key="12" onClick={() => this.toRouter({
+                            address: "/message/recordinfo",
+                            componentName: {
+                                firstName: "记录管理",
+                                secondName: "所有简记",
+                                lastName: "",
+                            }
+                        })}>所有简记</Menu.Item>
                     </SubMenu>
                 </Menu>
 

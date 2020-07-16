@@ -10,7 +10,7 @@ import message from 'antd/es/message'
 import Alert from 'antd/es/alert'
 import notification from 'antd/es/notification'
 
-import './index.css'
+import '../css/index.css'
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { reqGetBlogInfoById, reqUpdateBlogContent, reqDeleteBlogImage } from '../../../api/blog'
 
@@ -49,6 +49,7 @@ export default class UpdateBlogInfo extends Component {
     handleCancel = () => this.setState({ previewVisible: false });
 
     handlePreview = async file => {
+        console.log(file)
         if (!file.url && !file.preview) {
             file.preview = await this.getBase64(file.originFileObj);
         }
@@ -60,11 +61,10 @@ export default class UpdateBlogInfo extends Component {
         });
     };
 
-    // handleChange = ({ fileList }) => this.setState({ fileList });
-
     // 上传结果的promise
     getBase64 = (file) => {
         return new Promise((resolve, reject) => {
+            
             const reader = new FileReader();
             reader.readAsDataURL(file);
             reader.onload = () => resolve(reader.result);
@@ -93,27 +93,28 @@ export default class UpdateBlogInfo extends Component {
 
     // 图片上传
     stateUpload = (info) => {
-        console.log(info.file.status);
         let { blog, uploadIndex } = this.state
-        if (info.file.status !== 'uploading') {
-            if (info.file.status === "removed") {
-                reqDeleteBlogImage(blog._id, uploadIndex, info.file.uid).then(res => {
-                    if (res === 1) {
-                        message.success("删除成功")
-                        this.getBlogInfo(this.props.match.params.id)
-                    } else {
-                        message.error("删除失败")
-                    }
-                }).catch(err => {
-                    message.error(err)
-                })
-            }
+        if (info.file.status === 'uploading') {
+            setTimeout(()=>{
+                this.getBlogInfo(this.props.match.params.id)
+            },1000)
         }
         if (info.file.status === 'done') {
             message.success("图片上传成功");
             this.getBlogInfo(this.props.match.params.id)
         } else if (info.file.status === 'error') {
             message.error(`${info.file.name} file upload failed.`);
+        } else if (info.file.status === "removed") {
+            reqDeleteBlogImage(blog._id, uploadIndex, info.file.uid).then(res => {
+                if (res === 1) {
+                    message.success("删除成功")
+                    this.getBlogInfo(this.props.match.params.id)
+                } else {
+                    message.error("删除失败")
+                }
+            }).catch(err => {
+                message.error(err)
+            })
         }
     }
 

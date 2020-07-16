@@ -9,6 +9,7 @@ import User from '../../pages/User'
 import Blog from '../../pages/Blog'
 import Sort from '../../pages/Sort'
 import Backend from '../../pages/Backend'
+import Message from '../../pages/Message'
 
 import { Button } from 'antd';
 import {connect} from "react-redux"
@@ -68,6 +69,7 @@ class Main extends Component {
                             <Route path="/user" component={User} />
                             <Route path="/blog" component={Blog} />
                             <Route path="/sort" component={Sort} />
+                            <Route path="/message" component={Message} />
                             <Redirect to="/backend" />
                         </Switch>
                     </Suspense>

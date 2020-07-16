@@ -1,0 +1,7 @@
+.listItemHover:hover{
+    background-color: rgb(250, 245, 245);
+    
+}
+.listItemHover{
+    transition: all 0.2s;
+}

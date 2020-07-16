@@ -19,6 +19,7 @@ const { Option } = Select;
 @connect(
     (state) => ({
         blogs: state.blogs,
+        sort : state.sort
     }),
     { getAllBlog }
 )
@@ -156,6 +157,7 @@ class AllBlog extends Component {
     }
     render() {
         const { showBlog } = this.state
+        const {sort} = this.props
         const columns = [
             {
                 title: '日期',
@@ -215,11 +217,9 @@ class AllBlog extends Component {
                         </Radio.Group>
                         <Select defaultValue="" style={{ width: 200, color: "orangered" }} onChange={this.handleChange}>
                             <Option value="" disabled style={{ color: "orange" }}>博客类型</Option>
-                            <Option value={0}>所有博客</Option>
-                            <Option value={1}>学习技巧</Option>
-                            <Option value={2}>精选摘要</Option>
-                            <Option value={3}>生活记录</Option>
-                            <Option value={4}>其他</Option>
+                            {sort.map((item,index)=>(
+                                <Option key={index} value={item.stype}>{item.sname}</Option>
+                            ))}
                         </Select>
                     </Space>
                 </Card>

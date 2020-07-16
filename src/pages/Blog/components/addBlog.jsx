@@ -16,14 +16,15 @@ import { MinusCircleOutlined, PlusOutlined, EditFilled, ExclamationCircleOutline
 import notification from 'antd/es/notification'
 import PubSub from 'pubsub-js'
 import { connect } from 'react-redux'
-import './index.css'
+import '../css/index.css'
 const { Option } = Select;
 
 
 
 @connect(
     (state) => ({
-        user: state.user
+        user: state.user,
+        sort: state.sort
     })
 )
 class addBlog extends Component {
@@ -179,6 +180,7 @@ class addBlog extends Component {
 
     render() {
         const { TextArea } = Input;
+        let { sort } = this.props
         const { tags, inputVisible, inputValue, editInputIndex, editInputValue, blogContent, blogMessage, blogTitle } = this.state
         const formItemLayout = {
             labelCol: {
@@ -293,10 +295,9 @@ class addBlog extends Component {
                             <Form.Item>
                                 <Select defaultValue={1} onChange={this.handleChange}>
                                     <Option value="" disabled>博客类型选择</Option>
-                                    <Option value={1}>学习技巧</Option>
-                                    <Option value={2}>精选摘要</Option>
-                                    <Option value={3}>生活记录</Option>
-                                    <Option value={4}>其他</Option>
+                                    {sort.map((item, index) => (
+                                        <Option key={index} value={item.stype}>{item.sname}</Option>
+                                    ))}
                                 </Select>
                             </Form.Item>
 
